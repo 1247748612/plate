@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
@@ -31,6 +32,8 @@ export const ImageElement = (props: ImageElementProps) => {
   } = props;
 
   const rootProps = getRootProps(props);
+
+  const compositionRef = useRef(false);
 
   const { placeholder = 'Write a caption...' } = caption;
 
@@ -67,6 +70,7 @@ export const ImageElement = (props: ImageElementProps) => {
 
   const onChangeCaption: ChangeEventHandler<HTMLTextAreaElement> = useCallback(
     (e) => {
+      if (!compositionRef.current) return;
       const path = ReactEditor.findPath(editor as ReactEditor, element);
       setNodes(editor, { caption: [{ text: e.target.value }] }, { at: path });
     },
@@ -144,6 +148,12 @@ export const ImageElement = (props: ImageElementProps) => {
               className={styles.figcaption?.className}
             >
               <TextareaAutosize
+                onCompositionStart={() => {
+                  compositionRef.current = true;
+                }}
+                onCompositionEnd={() => {
+                  compositionRef.current = false;
+                }}
                 css={styles.caption?.css}
                 className={styles.caption?.className}
                 value={nodeCaption[0].text}
